@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+
+  portainer: #password: admin2020
+    image: portainer/portainer
+    container_name: portainer
+    restart: on-failure
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - microservices-network 
+
+  frontend:
+    container_name: service-frontend
+    image: microservice-frontend
+    build:
+      context: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+    networks:
+      - microservices-network
+
+  api:
+    container_name: api
+    image: microservice-api
+    build:
+     context: ./api
+    ports:
+      - "5000:80"
+    networks:
+      - microservices-network
+
+  rabbitmq:
+    image: rabbitmq:3.7-management-alpine
+    container_name: rabbitmq
+    # hostname: rabbitmq
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/mnesia
+    # - "./rabbitmq/etc/:/etc/rabbitmq/"
+    #  - "./rabbitmq/data/:/var/lib/rabbitmq/"
+    #  - "./rabbitmq/logs/:/var/log/rabbitmq/"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 'sua-chave-aqui'
+      RABBITMQ_DEFAULT_USER: 'admin'
+      RABBITMQ_DEFAULT_PASS: 'admin'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - microservices-network
+
+  # db:
+  #   container_name: dbcob
+  #   image: "microsoft/mssql-server-linux"
+  #   environment:
+  #    SA_PASSWORD: "Your_password123"
+  #    ACCEPT_EULA: "Y"
+  #   ports:
+  #    - "1455:1433"
+
+networks: 
+  microservices-network:
+    driver: bridge
