@@ -17,7 +17,7 @@ services:
     container_name: service-frontend
     image: microservice-frontend
     build:
-      context: ./frontend
+      context: ./front
     depends_on:
       - api
     ports:
